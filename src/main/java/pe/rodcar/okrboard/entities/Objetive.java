@@ -10,11 +10,15 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -31,6 +35,12 @@ public class Objetive {
 	
 	@OneToMany(mappedBy="objetive", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
 	private List<KeyResult> keyResults;
+	
+	@JsonIgnore
+	@NotNull(message="the objective need to be associated with an user")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "users_id", nullable=false)
+	private User user;
 	
 	public Objetive() {
 		this.keyResults = new ArrayList<>();

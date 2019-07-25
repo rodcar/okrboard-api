@@ -29,7 +29,7 @@ public class KeyResult {
 	private Double progress;
 	
 	@JsonIgnore
-	@NotNull(message="El resultado clave debe estar asociado a un objetivo")
+	@NotNull(message="The Key Result need to be associated with an objective")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "objetives_id", nullable=false)
 	private Objetive objetive;
