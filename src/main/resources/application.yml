@@ -2,18 +2,4 @@ farma:
   app:
     jwtExpiration: 86400
     jwtSecret: jwtOKRboardSecretKey
-spring:
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    password: root
-    url: jdbc:postgresql://localhost:5433/okrboard
-    username: postgres
-  jpa:
-    database: POSTGRESQL
-    hibernate:
-      ddl-auto: update
-    show-sql: 'false'
-    properties.hibernate.temp.use_jdbc_metadata_defaults: false
-server:
-  port: 8090
 spring.jackson.serialization.fail-on-empty-beans: false
