@@ -6,7 +6,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+//import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -29,10 +29,10 @@ public class KeyResult {
 	private Double progress;
 	
 	@JsonIgnore
-	@NotNull(message="The Key Result need to be associated with an objective")
+	//@NotNull(message="The Key Result need to be associated with an objective")
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "objetives_id", nullable=false)
-	private Objetive objetive;
+	@JoinColumn(name = "objectives_id", nullable=false)
+	private Objective objective;
 	
 	public KeyResult() {
 		this.progress = 0.0;
@@ -62,12 +62,12 @@ public class KeyResult {
 		this.progress = progress;
 	}
 
-	public Objetive getObjetive() {
-		return objetive;
+	public Objective getObjective() {
+		return objective;
 	}
 
-	public void setObjetive(Objetive objetive) {
-		this.objetive = objetive;
+	public void setObjective(Objective objetive) {
+		this.objective = objetive;
 	}
 	
 }

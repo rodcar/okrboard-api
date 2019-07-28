@@ -65,7 +65,7 @@ public class User{
     
     @JsonIgnore
 	@OneToMany(mappedBy="user", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
-	private List<Objetive> objetives;
+	private List<Objective> objetives;
 
     public User() {
     	this.objetives = new ArrayList<>();

@@ -22,9 +22,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 @Entity
-@Table(name="objetives")
+@Table(name="objectives")
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class Objetive {
+public class Objective {
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -33,7 +33,7 @@ public class Objetive {
 	@Column(name="title", nullable=true, length=500)
 	private String title;
 	
-	@OneToMany(mappedBy="objetive", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="objective", fetch=FetchType.LAZY, cascade=CascadeType.ALL)
 	private List<KeyResult> keyResults;
 	
 	@JsonIgnore
@@ -42,8 +42,9 @@ public class Objetive {
 	@JoinColumn(name = "users_id", nullable=false)
 	private User user;
 	
-	public Objetive() {
+	public Objective() {
 		this.keyResults = new ArrayList<>();
+		this.user = new User();
 	}
 
 	public Long getId() {
@@ -68,6 +69,14 @@ public class Objetive {
 
 	public void setKeyResults(List<KeyResult> keyResults) {
 		this.keyResults = keyResults;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 }
