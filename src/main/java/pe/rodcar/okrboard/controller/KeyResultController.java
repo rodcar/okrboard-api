@@ -180,7 +180,13 @@ public class KeyResultController {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		}
 		
-		try {			
+		try {
+			KeyResult keyResult = keyResultService.findById(id).get();
+			
+			if (userPrinciple.getId() != keyResult.getObjective().getUser().getId()) {
+				return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+			}
+			
 			keyResultService.deleteById(id);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
