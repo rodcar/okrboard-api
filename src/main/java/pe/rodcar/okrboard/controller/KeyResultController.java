@@ -4,6 +4,8 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,9 +14,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,10 +35,15 @@ import pe.rodcar.okrboard.service.KeyResultService;
 import pe.rodcar.okrboard.service.ObjectiveService;
 import pe.rodcar.okrboard.service.UserService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/users")
 @Api(value= "REST of key results")
 public class KeyResultController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(KeyResultController.class);
 
 	@Autowired
 	private KeyResultService keyResultService;
@@ -60,7 +69,7 @@ public class KeyResultController {
 	@PreAuthorize("hasRole('USER')")
 	@ApiOperation(value="Save a key result", authorizations = @Authorization(value="Bearer"))
 	@PostMapping(value="/{userId}/objectives/{objectiveId}/keyresults", consumes=MediaType.APPLICATION_JSON_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> saveKeyResult(@PathVariable("userId") Long userId, @PathVariable("objectiveId") Long objectiveId, @RequestBody KeyResult keyResult, Principal principal) {
+	public ResponseEntity<Object> saveKeyResult(@PathVariable("userId") Long userId, @PathVariable("objectiveId") Long objectiveId, @Valid @RequestBody KeyResult keyResult, Principal principal) {
 		
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		
@@ -108,6 +117,72 @@ public class KeyResultController {
 			} else {
 				return new ResponseEntity<>(keyResult.get(), HttpStatus.OK);
 			}			
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@PreAuthorize("hasRole('USER')")
+	@ApiOperation(value="Updates a Key Result by id", authorizations = @Authorization(value="Bearer"))
+	@PutMapping(value="/{userId}/objectives/{objectiveId}/keyresults/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<KeyResult> updateKeyResult(@PathVariable("userId") Long userId, @PathVariable("objectiveId") Long objectiveId, @PathVariable("id") Long id, @Valid @RequestBody KeyResult keyResultRequest, Principal principal) {
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		if (authentication instanceof AnonymousAuthenticationToken) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		
+		UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+		
+		if (userPrinciple.getId() != userId) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		
+		if (!objectiveService.existsById(objectiveId) || !keyResultService.existsById(id)) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		
+		try {
+			KeyResult keyResult = keyResultService.findById(id).get();
+			
+			logger.info("user id finded: " + keyResult.getObjective().getUser().getId() + ", user principle id: " + userPrinciple.getId());			
+			if (keyResult.getObjective().getUser().getId() != userPrinciple.getId()) {
+				return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+			}
+			
+			keyResult.setTitle(keyResultRequest.getTitle());
+			keyResult.setProgress(keyResultRequest.getProgress());
+			KeyResult keyResultUpdated = keyResultService.update(keyResult);
+			return new ResponseEntity<>(keyResultUpdated, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}		
+	}
+	
+	@PreAuthorize("hasRole('USER')")
+	@ApiOperation(value="Deletes an Key Result by id", authorizations = @Authorization(value = "Bearer"))
+	@DeleteMapping(value="/{userId}/objectives/{objectiveId}/keyresults/{id}")
+	public ResponseEntity<Object> deleteKeyResult(@PathVariable("userId") Long userId, @PathVariable("objectiveId") Long objectiveId, @PathVariable("id") Long id, Principal principal) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		if (authentication instanceof AnonymousAuthenticationToken) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		
+		UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+		
+		if (userPrinciple.getId() != userId) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		
+		if (!objectiveService.existsById(objectiveId) || !keyResultService.existsById(id)) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		
+		try {			
+			keyResultService.deleteById(id);
+			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
