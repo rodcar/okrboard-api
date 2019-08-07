@@ -45,5 +45,10 @@ public class KeyResultServiceImpl implements KeyResultService{
 	public Optional<KeyResult> findById(Long id) throws Exception {
 		return keyResultRepository.findById(id);
 	}
+
+	@Override
+	public boolean existsById(Long id) { 
+		return keyResultRepository.existsById(id);
+	}
 	
 }
