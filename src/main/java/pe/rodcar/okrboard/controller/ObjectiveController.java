@@ -92,21 +92,55 @@ public class ObjectiveController {
 		}
 	}
 	
-	@ApiOperation("Update an objetive")
+	@ApiOperation(value="Update an objetive", authorizations = @Authorization(value = "Bearer"))
 	@PutMapping(value= "/{userId}/objectives/{id}", consumes= MediaType.APPLICATION_JSON_VALUE, produces= MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Object> updateObjetive(@PathVariable("id") Long id, @RequestBody Objective objetive) {
+	public ResponseEntity<Objective> updateObjetive(@PathVariable("userId") Long userId, @PathVariable("id") Long id, @RequestBody Objective objetiveRequest, Principal principal) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		if (authentication instanceof AnonymousAuthenticationToken) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		
+		UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+		
+		if (userPrinciple.getId() != userId) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}	
+		
 		try {
-			objetive.setId(id);
-			objetiveService.update(objetive);
-			return new ResponseEntity<>(HttpStatus.OK);
+			Optional<Objective> objective = objetiveService.findById(id);
+			
+			if (!objective.isPresent()) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+			
+			if (objective.get().getUser().getId() != userPrinciple.getId()) {
+				return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+			}
+			
+			objective.get().setTitle(objetiveRequest.getTitle());						
+			objetiveService.update(objective.get());
+			return new ResponseEntity<>(objective.get(), HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
-	@ApiOperation("Delete an objetive")
+	@ApiOperation(value="Delete an objetive", authorizations = @Authorization(value = "Bearer"))
 	@DeleteMapping(value = "/{userId}/objectives/{id}", produces=MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> deleteObjetive(@PathVariable("id") Long id) {
+	public ResponseEntity<Object> deleteObjetive(@PathVariable("userId") Long userId, @PathVariable("id") Long id, Principal principal) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		
+		if (authentication instanceof AnonymousAuthenticationToken) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		
+		UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+		
+		if (userPrinciple.getId() != userId) {
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}			
+		
 		try {
 			Optional<Objective> objetive = objetiveService.findById(id);
 			
@@ -114,7 +148,7 @@ public class ObjectiveController {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);			
 			} else {
 				objetiveService.deleteById(id);
-				return new ResponseEntity<>("The objetive was deleted", HttpStatus.OK);
+				return new ResponseEntity<>(HttpStatus.OK);
 			}
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
