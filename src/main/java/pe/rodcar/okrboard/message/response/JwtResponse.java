@@ -5,15 +5,17 @@ import java.util.Collection;
 import org.springframework.security.core.GrantedAuthority;
 
 public class JwtResponse {
+	private String email;
 	private String token;
 	private String type = "Bearer";
-	private String username;
+	private Long id;
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public JwtResponse(String accessToken, String username, Collection<? extends GrantedAuthority> authorities) {
+	public JwtResponse(String accessToken, Long id, String email, Collection<? extends GrantedAuthority> authorities) {
 		this.token = accessToken;
-		this.username = username;
+		this.id = id;
 		this.authorities = authorities;
+		this.email = email;
 	}
 
 	public String getAccessToken() {
@@ -32,15 +34,24 @@ public class JwtResponse {
 		this.type = tokenType;
 	}
 
-	public String getUsername() {
-		return username;
+	public Long getId() {
+		return id;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
+	public void setId(Long id) {
+		this.id = id;
 	}
 	
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
     }
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	
 }
