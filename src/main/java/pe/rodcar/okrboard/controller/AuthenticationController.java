@@ -30,6 +30,7 @@ import pe.rodcar.okrboard.message.response.ResponseMessage;
 import pe.rodcar.okrboard.repository.RoleRepository;
 import pe.rodcar.okrboard.repository.UserRepository;
 import pe.rodcar.okrboard.security.jwt.JwtProvider;
+import pe.rodcar.okrboard.security.services.UserPrinciple;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -60,9 +61,9 @@ public class AuthenticationController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		String jwt = jwtProvider.generateJwtToken(authentication);
-		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+		UserPrinciple userDetails = (UserPrinciple) authentication.getPrincipal();
 
-		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
+		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), userDetails.getAuthorities()));
 	}
 
 	@PostMapping("/signup")
