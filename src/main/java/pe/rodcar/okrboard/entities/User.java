@@ -27,9 +27,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {
+        /*@UniqueConstraint(columnNames = {
             "username"
-        }),
+        }),*/
         @UniqueConstraint(columnNames = {
             "email"
         })
@@ -39,13 +39,13 @@ public class User{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    /*@NotBlank
     @Size(min=3, max = 50)
     private String name;
 
     @NotBlank
     @Size(min=3, max = 50)
-    private String username;
+    private String username;*/
 
     @NaturalId
     @NotBlank
@@ -71,9 +71,7 @@ public class User{
     	this.objetives = new ArrayList<>();
     }
 
-    public User(String name, String username, String email, String password) {
-        this.name = name;
-        this.username = username;
+    public User(String email, String password) {
         this.email = email;
         this.password = password;
     }
@@ -86,7 +84,7 @@ public class User{
         this.id = id;
     }
 
-    public String getUsername() {
+    /*public String getUsername() {
         return username;
     }
 
@@ -100,7 +98,7 @@ public class User{
 
     public void setName(String name) {
         this.name = name;
-    }
+    }*/
 
     public String getEmail() {
         return email;

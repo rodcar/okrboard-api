@@ -55,7 +55,7 @@ public class AuthenticationController {
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginRequest) {
 
 		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+				new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -67,44 +67,17 @@ public class AuthenticationController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpForm signUpRequest) {
-		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-			return new ResponseEntity<>(new ResponseMessage("Fallo -> ¡El nombre de usuario ya está en uso!"),
-					HttpStatus.BAD_REQUEST);
-		}
-
 		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-			return new ResponseEntity<>(new ResponseMessage("Fallo -> ¡El correo electrónico ya está en uso!"),
+			// TODO We can use a Global Error Handler
+			return new ResponseEntity<>(new ResponseMessage("Error -> The email is already in use"),
 					HttpStatus.BAD_REQUEST);
 		}
-
 		
-		User user = new User(signUpRequest.getName(), signUpRequest.getUsername(), signUpRequest.getEmail(),
-				encoder.encode(signUpRequest.getPassword()));
-
-		Set<String> strRoles = signUpRequest.getRole();
-		Set<Role> roles = new HashSet<>();
-
-		strRoles.forEach(role -> {
-			switch (role) {
-			case "admin":
-				Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
-						.orElseThrow(() -> new RuntimeException("¡Fallo! -> Causa: El rol del usuario no se encuentra."));
-				roles.add(adminRole);
-
-				break;
-			case "pm":
-				Role pmRole = roleRepository.findByName(RoleName.ROLE_PM)
-						.orElseThrow(() -> new RuntimeException("¡Fallo! -> Causa: El rol del usuario no se encuentra."));
-				roles.add(pmRole);
-
-				break;
-			default:
-				Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
-						.orElseThrow(() -> new RuntimeException("¡Fallo! -> Causa: El rol del usuario no se encuentra."));
-				roles.add(userRole);
-			}
-		});
-
+		User user = new User(signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()));
+		Set<Role> roles = new HashSet<>();		
+		Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
+				.orElseThrow(() -> new RuntimeException("¡Fallo! -> Causa: El rol del usuario no se encuentra."));
+		roles.add(userRole);
 		user.setRoles(roles);
 		userRepository.save(user);
 
